@@ -1,20 +1,32 @@
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
+-- إنشاء النافذة الرئيسية
 local Window = Rayfield:CreateWindow({
-    Name = "Mining World Script | By Ｇんｏｓｔ 🥀",
-    LoadingTitle = "Loading...",
-    LoadingSubtitle = "Welcome",
+    Name = "⚡ نظام الأنشنت التلقائي | By Ｇんｏｓｔ 🥀",
+    LoadingTitle = "جاري التحميل...",
+    LoadingSubtitle = "نظام التلقائي للأنشنت - الإصدار المحدث",
     ConfigurationSaving = {
-       Enabled = true,
-       FolderName = "Mining World",
-       FileName = "Config"
+        Enabled = true,
+        FolderName = "GhostEnchantPro",
+        FileName = "ConfigV2"
     },
-    Discord = {
-       Enabled = false,
-       Invite = "noinvitelink",
-       RememberJoins = true
-    },
-    KeySystem = false
+    KeySystem = false,
+    KeySettings = {
+        Title = "نظام المفتاح",
+        Subtitle = "أدخل مفتاح الوصول",
+        Note = "لا يلزم مفتاح في هذا الإصدار",
+        FileName = "Key",
+        SaveKey = false,
+        GrabKeyFromSite = false,
+        Actions = {
+            [1] = {
+                Text = "نسخ الرابط",
+                OnPress = function()
+                    setclipboard("https://github.com/yourrepo")
+                end,
+            }
+        }
+    }
 })
 
 -- قائمة الأنشنتات المتاحة
@@ -32,175 +44,210 @@ local availableEnchants = {
     "Abnormal Speed"
 }
 
--- متغيرات السكريبت
+-- متغيرات النظام
 local isRunning = false
 local selectedEnchant = availableEnchants[1]
 local args = {6, 1}
 
--- تبويب رئيسي
-local MainTab = Window:CreateTab("Main", 4483362458)
+-- تبويب التحكم الرئيسي
+local MainTab = Window:CreateTab("التحكم", 13014546637) -- أيقونة جديدة
 
--- Dropdown لاختيار الأنشنت
+-- قسم الأنشنت
+local EnchantSection = MainTab:CreateSection("إعدادات الأنشنت")
+
 local EnchantDropdown = MainTab:CreateDropdown({
-    Name = "Select Enchant",
+    Name = "الأنشنت المطلوب",
     Options = availableEnchants,
     CurrentOption = selectedEnchant,
-    Flag = "EnchantSelection",
+    Flag = "EnchantTarget",
     Callback = function(Option)
         selectedEnchant = Option
         Rayfield:Notify({
-            Title = "Seleced",
-            Content = "The Target : " .. Option,
-            Duration = 2,
-            Image = 4483362458,
+            Title = "تم تحديد الهدف",
+            Content = "سيتم البحث عن: " .. Option,
+            Duration = 3,
+            Image = 13014546637,
             Actions = {
-                Ignore = {
-                    Name = "Done",
-                    Callback = function()
-                    end
+                {
+                    Name = "تم",
+                    Callback = function() end
                 },
             },
         })
     end,
 })
 
--- زر التشغيل/الإيقاف
-local ToggleButton = MainTab:CreateToggle({
-    Name = "Auto Enchant",
+-- قسم التشغيل
+local ControlSection = MainTab:CreateSection("تحكم التشغيل")
+
+local Toggle = MainTab:CreateToggle({
+    Name = "التشغيل التلقائي",
     CurrentValue = false,
     Flag = "AutoEnchantToggle",
     Callback = function(Value)
         isRunning = Value
         if Value then
-            Rayfield:Notify({
-                Title = "Turn On",
-                Content = "Looking For: " .. selectedEnchant,
-                Duration = 3,
-                Image = 4483362458,
-            })
-            enchantLoop()
-        else
-            Rayfield:Notify({
-                Title = "Turn Off",
-                Content = "Stop Auto Enchant Done ✅",
-                Duration = 3,
-                Image = 4483362458,
-            })
+            StartEnchantLoop()
         end
     end,
 })
 
--- قسم الإعدادات
-local SettingsTab = Window:CreateTab("Settings", 4483362458)
+-- تبويب الإعدادات المتقدمة
+local SettingsTab = Window:CreateTab("الإعدادات المتقدمة", 13014546637)
 
--- إعدادات الـ Enchant
-SettingsTab:CreateInput({
-    Name = "Edit Enchant Args",
-    PlaceholderText = "Example : 6,1",
+local AdvancedSection = SettingsTab:CreateSection("المعلمات الفنية")
+
+local ArgsInput = SettingsTab:CreateInput({
+    Name = "وسائط الأنشنت",
+    PlaceholderText = "أدخل الأرقام مفصولة بفاصلة (6,1)",
     RemoveTextAfterFocusLost = false,
     Callback = function(Text)
-        local success, err = pcall(function()
-            local parts = string.split(Text, ",")
-            args = {tonumber(parts[1]), tonumber(parts[2])}
-        end)
-        if not success then
+        local parts = {}
+        for part in Text:gmatch("[^,]+") do
+            table.insert(parts, tonumber(part))
+        end
+        
+        if #parts == 2 then
+            args = parts
             Rayfield:Notify({
-                Title = "Error While Inserting",
-                Content = "Use Right Numbers",
-                Duration = 5,
-                Image = 4483362458,
+                Title = "تم التحديث",
+                Content = "الوسائط الجديدة: " .. table.concat(args, ","),
+                Duration = 3,
+                Image = 13014546637,
             })
         end
     end,
 })
 
--- دالة محسنة للتحقق من السحر الحالي
-local function getCurrentEnchant()
+-- تبويب المعلومات
+local InfoTab = Window:CreateTab("المعلومات", 13014546637)
+
+local InfoSection = InfoTab:CreateSection("معلومات النظام")
+
+InfoTab:CreateLabel("الإصدار: 3.0.0")
+InfoTab:CreateLabel("محرر السكريبت: Ｇんｏｓｔ 🥀")
+InfoTab:CreateLabel("تاريخ البناء: " .. os.date("%Y/%m/%d"))
+
+local Button = InfoTab:CreateButton({
+    Name = "نسخ معلومات التصحيح",
+    Callback = function()
+        local debugInfo = string.format([[
+            Auto Enchant Debug Info:
+            Game: %s
+            Player: %s
+            Target Enchant: %s
+            Args: %s,%s
+            Time: %s
+        ]], game.Name, game.Players.LocalPlayer.Name, selectedEnchant, args[1], args[2], os.date())
+        
+        setclipboard(debugInfo)
+        Rayfield:Notify({
+            Title = "تم النسخ",
+            Content = "معلومات التصحيح جاهزة للاستخدام",
+            Duration = 3,
+            Image = 13014546637,
+        })
+    end,
+})
+
+-- متطلبات النظام
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Player = Players.LocalPlayer
+
+-- دالة التحقق من الأنشنت الحالي
+local function GetCurrentEnchant()
     local success, result = pcall(function()
-        local slot = Player.PlayerGui.ScreenGui.Enchant.Content.Slots["1"]
+        local gui = Player.PlayerGui:FindFirstChild("ScreenGui")
+        if not gui then return nil end
+        
+        local enchantFrame = gui:FindFirstChild("Enchant")
+        if not enchantFrame then return nil end
+        
+        local slot = enchantFrame.Content.Slots:FindFirstChild("1")
+        if not slot then return nil end
+        
         local textElement = slot:FindFirstChild("EnchantName") or 
                           slot:FindFirstChildOfClass("TextLabel") or
                           slot:FindFirstChildOfClass("TextButton")
-        return textElement and textElement.Text or ""
-    end)
-    return success and result or ""
-end
-
--- دالة ذكية للمقارنة
-local function isTargetReached(current, target)
-    local clean = function(text)
-        return text:gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1"):lower()
-    end
-    return clean(current) == clean(target)
-end
-
--- دالة تنفيذ السحر
-local function performEnchant()
-    local success, errorMsg = pcall(function()
-        local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Enchant")
-        if remote then
-            remote:FireServer(unpack(args))
-            return true
-        end
-        return false
+        
+        return textElement and textElement.Text or nil
     end)
     
     if not success then
+        warn("Error getting enchant:", result)
+        return nil
+    end
+    
+    return result
+end
+
+-- دالة تنفيذ الأنشنت
+local function PerformEnchant()
+    local success, result = pcall(function()
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        if not remotes then return false end
+        
+        local enchantRemote = remotes:FindFirstChild("Enchant")
+        if not enchantRemote then return false end
+        
+        enchantRemote:FireServer(unpack(args))
+        return true
+    end)
+    
+    if not success then
+        warn("Enchant failed:", result)
         Rayfield:Notify({
-            Title = "Error While Process",
-            Content = tostring(errorMsg),
+            Title = "فشل التنفيذ",
+            Content = tostring(result),
             Duration = 5,
-            Image = 4483362458,
+            Image = 13014546637,
         })
         return false
     end
-    return true
+    
+    return result
 end
 
 -- الحلقة الرئيسية
-local function enchantLoop()
-    while isRunning and task.wait(0.7) do
-        local currentEnchant = getCurrentEnchant()
-        
-        if isTargetReached(currentEnchant, selectedEnchant) then
-            isRunning = false
-            ToggleButton:Set(false)
+local function StartEnchantLoop()
+    task.spawn(function()
+        while isRunning do
+            local current = GetCurrentEnchant()
             
-            Rayfield:Notify({
-                Title = "Reach Selected Enchant",
-                Content = "Got : " .. selectedEnchant,
-                Duration = 5,
-                Image = 4483362458,
-            })
-            break
+            if current and string.find(current:lower(), selectedEnchant:lower(), 1, true) then
+                isRunning = false
+                Toggle:Set(false)
+                
+                Rayfield:Notify({
+                    Title = "تم إنجاز المهمة",
+                    Content = "تم الوصول إلى: " .. selectedEnchant,
+                    Duration = 5,
+                    Image = 13014546637,
+                })
+                break
+            end
+            
+            if not PerformEnchant() then
+                isRunning = false
+                Toggle:Set(false)
+                break
+            end
+            
+            task.wait(0.7)
         end
-        
-        if not performEnchant() then
-            isRunning = false
-            ToggleButton:Set(false)
-            break
-        end
-    end
+    end)
 end
 
--- قسم المعلومات
-local InfoTab = Window:CreateTab("Information")
-
-InfoTab:CreateLabel("Mining World Script")
-InfoTab:CreateLabel("By : Ｇんｏｓｔ ")
-
-InfoTab:CreateButton({
-    Name = "Copy Source Code",
-    Callback = function()
-        setclipboard("Fuck Off Nigga")
-        Rayfield:Notify({
-            Title = "Copy",
-            Content = "Copied",
-            Duration = 3,
-            Image = 4483362458,
-        })
-    end,
-})
-
--- تحميل الإعدادات المحفوظة
+-- تحميل الإعدادات
 Rayfield:LoadConfiguration()
+
+-- إشعار البدء
+task.delay(2, function()
+    Rayfield:Notify({
+        Title = "النظام جاهز",
+        Content = "يمكنك بدء استخدام نظام الأنشنت التلقائي",
+        Duration = 5,
+        Image = 13014546637,
+    })
+end)
