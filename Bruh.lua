@@ -22,7 +22,7 @@ local availableEnchants = {
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "By Ｇんｏｓｔ 🥀",
     Text = "on Roblox",
-    Duration = 10,
+    Duration = 12,
     Icon = "rbxassetid://138737424813164" -- يدعم أيقونات صغيرة فقط
 })
 
@@ -56,10 +56,10 @@ dropdown.Parent = frame
 
 local dropdownFrame = Instance.new("Frame")
 dropdownFrame.Size = UDim2.new(0.8, 0, 0, 0) -- سيتم تعديل الارتفاع عند الفتح
-dropdownFrame.Position = UDim2.new(0.1, 0, 0.2, 30)
+dropdownFrame.Position = UDim2.new(0.5, 125, 0.2, 0) -- جعل القائمة تظهر بجانب الواجهة
 dropdownFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 dropdownFrame.Visible = false
-dropdownFrame.Parent = frame
+dropdownFrame.Parent = screenGui
 
 local layout = Instance.new("UIListLayout")
 layout.Parent = dropdownFrame
