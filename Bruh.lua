@@ -23,7 +23,6 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "By Ｇんｏｓｔ 🥀",
     Text = "on Roblox",
     Duration = 10,
-    Icon = "rbxassetid://138737424813164" -- يدعم أيقونات صغيرة فقط
 })
 
 -- إنشاء واجهة المستخدم
@@ -55,7 +54,7 @@ dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
 dropdown.Parent = frame
 
 local dropdownFrame = Instance.new("Frame")
-dropdownFrame.Size = UDim2.new(0.8, 0, 0, 0) -- سيتم تعديل الارتفاع عند الفتح
+dropdownFrame.Size = UDim2.new(0.6, 0, 0, 0) -- تصغير الحجم
 dropdownFrame.Position = UDim2.new(0, 250, 0.2, 0) -- جعل القائمة تظهر بجانب الواجهة
 dropdownFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 dropdownFrame.Visible = false
@@ -105,9 +104,9 @@ end
 dropdown.MouseButton1Click:Connect(function()
     dropdownFrame.Visible = not dropdownFrame.Visible
     if dropdownFrame.Visible then
-        dropdownFrame.Size = UDim2.new(0.8, 0, 0, #availableEnchants * 30)
+        dropdownFrame.Size = UDim2.new(0.6, 0, 0, #availableEnchants * 30) -- تصغير الحجم بناءً على العناصر
     else
-        dropdownFrame.Size = UDim2.new(0.8, 0, 0, 0)
+        dropdownFrame.Size = UDim2.new(0.6, 0, 0, 0)
     end
 end)
 
