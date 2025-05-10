@@ -5,17 +5,17 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- قائمة الأنشنتات المتاحة
 local availableEnchants = {
-    "Magic Ores 75%",
-    "Incredible Damage 50%",
-    "Deadly Damage++ 25%",
-    "Deadly Damage 20%",
-    "More Damage 15%",
-    "Light Damage 10%",
-    "Incredible Luck 50%",
-    "Mighty Luck++ 25%",
-    "Mighty Luck 20%",
-    "Considerable Luck 15%",
-    "Abnormal Speed 15%"
+    "Magic Ores",
+    "Incredible Damage",
+    "Deadly Damage++",
+    "Deadly Damage",
+    "More Damage",
+    "Light Damage",
+    "Incredible Luck",
+    "Mighty Luck++",
+    "Mighty Luck",
+    "Considerable Luck",
+    "Abnormal Speed"
 }
 
 -- إشعار البداية (تم التعديل هنا)
