@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- قائمة الأنشنتات المتاحة
+-- قائمة الأنشنتات المتاحةk
 local availableEnchants = {
     "Magic Ores",
     "Incredible Damage",
