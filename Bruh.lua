@@ -213,4 +213,98 @@ RunButton.Font = Enum.Font.GothamBold
 RunButton.TextSize = 16
 RunButton.Parent = ContentFrame
 
-RunButton.MouseButton1Click:Connect(function
+RunButton.MouseButton1Click:Connect(function()
+    if not selectedEnchant or not args then 
+        warn("الرجاء اختيار Pickaxe و Enchant أولاً")
+        return 
+    end
+    if isRunning then return end
+    
+    isRunning = true
+    RunButton.Text = "جاري التشغيل..."
+    RunButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    
+    local remote = ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("Enchant")
+    if remote then
+        remote:FireServer(unpack(args))
+    end
+    
+    isRunning = false
+    RunButton.Text = "تشغيل"
+    RunButton.BackgroundColor3 = Color3.fromRGB(60, 100, 60)
+end)
+
+-- وظيفة التصغير/التكبير
+MinimizeButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        MainFrame.Size = minimizedSize
+        ContentFrame.Visible = false
+        MinimizeButton.Text = "+"
+    else
+        MainFrame.Size = originalSize
+        ContentFrame.Visible = true
+        MinimizeButton.Text = "_"
+    end
+end)
+
+-- جعل الواجهة قابلة للتحريك
+local dragging, dragInput, dragStart, startPos
+
+local function UpdateInput(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+end
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TitleBar.InputChanged:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        UpdateInput(input)
+    end
+end)
+
+-- التأكد من إغلاق القوائم عند النقر خارجها
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1) then
+        local mousePos = input.Position
+        local pickaxeFramePos = PickaxeFrame.AbsolutePosition
+        local pickaxeFrameSize = PickaxeFrame.AbsoluteSize
+        
+        if not (mousePos.X >= pickaxeFramePos.X and mousePos.X <= pickaxeFramePos.X + pickaxeFrameSize.X and
+               mousePos.Y >= pickaxeFramePos.Y and mousePos.Y <= pickaxeFramePos.Y + pickaxeFrameSize.Y) then
+            PickaxeFrame.Size = UDim2.new(0.9, 0, 0, 0)
+        end
+        
+        local enchantFramePos = EnchantFrame.AbsolutePosition
+        local enchantFrameSize = EnchantFrame.AbsoluteSize
+        
+        if not (mousePos.X >= enchantFramePos.X and mousePos.X <= enchantFramePos.X + enchantFrameSize.X and
+               mousePos.Y >= enchantFramePos.Y and mousePos.Y <= enchantFramePos.Y + enchantFrameSize.Y) then
+            EnchantFrame.Size = UDim2.new(0.9, 0, 0, 0)
+        end
+    end
+end)
