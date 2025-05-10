@@ -1,213 +1,113 @@
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Player = Players.LocalPlayer
+-- تحميل مكتبة Tora بشكل صحيح
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew", true))()
+
+-- إنشاء واجهة المستخدم الرئيسية
+local Player = game.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
+local screenGui = library.UI:Create("ScreenGui", {Parent = PlayerGui})
 
--- قائمة الأنشنتات المتاحة
-local availableEnchants = {
-    "Magic Ores",
-    "Incredible Damage",
-    "Deadly Damage++",
-    "Deadly Damage",
-    "More Damage",
-    "Light Damage",
-    "Incredible Luck",
-    "Mighty Luck++",
-    "Mighty Luck",
-    "Considerable Luck",
-    "Abnormal Speed"
-}
-
--- إشعار البداية (تم التعديل هنا)
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "By Ｇんｏｓｔ 🥀",
-    Text = "on Roblox",
-    Duration = 10,
+-- إنشاء الإطار الأساسي
+local frame = library.UI:Create("Frame", {
+    Parent = screenGui,
+    Size = UDim2.new(0, 250, 0, 180),
+    Position = UDim2.new(0.5, -125, 0.1, 0),
+    BackgroundColor3 = Color3.fromRGB(40, 40, 40),
 })
 
--- إنشاء واجهة المستخدم
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "AutoEnchantUI"
-screenGui.Parent = PlayerGui
+-- عنوان واجهة المستخدم
+local title = library.UI:Create("TextLabel", {
+    Parent = frame,
+    Size = UDim2.new(1, 0, 0, 30),
+    BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+    Text = "Auto Enchanter",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+})
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 250, 0, 180) -- تم زيادة الارتفاع لإضافة القائمة
-frame.Position = UDim2.new(0.5, -125, 0.1, 0)
-frame.AnchorPoint = Vector2.new(0.5, 0)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-frame.Parent = screenGui
+-- إنشاء الزر المنسدل للقائمة
+local dropdown = library.UI:Create("TextButton", {
+    Parent = frame,
+    Size = UDim2.new(0.8, 0, 0, 30),
+    Position = UDim2.new(0.1, 0, 0.2, 0),
+    Text = "Choose Enchant ▼",
+    BackgroundColor3 = Color3.fromRGB(80, 80, 80),
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+})
 
-local title = Instance.new("TextLabel")
-title.Text = "Auto Enchanter"
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Parent = frame
+-- إنشاء قائمة الأنشنتات
+local availableEnchants = {
+    "Magic Ores", "Incredible Damage", "Deadly Damage++", "Deadly Damage",
+    "More Damage", "Light Damage", "Incredible Luck", "Mighty Luck++",
+    "Mighty Luck", "Considerable Luck", "Abnormal Speed"
+}
 
--- Dropdown لقائمة الأنشنتات
-local dropdown = Instance.new("TextButton")
-dropdown.Text = "Choose Enchant ▼"
-dropdown.Size = UDim2.new(0.8, 0, 0, 30)
-dropdown.Position = UDim2.new(0.1, 0, 0.2, 0)
-dropdown.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-dropdown.Parent = frame
+-- إنشاء إطار القائمة المنسدلة
+local dropdownFrame = library.UI:Create("Frame", {
+    Parent = frame,
+    Size = UDim2.new(0.8, 0, 0, 0),
+    Position = UDim2.new(0.1, 0, 0.2, 30),
+    BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+    Visible = false,
+})
 
-local dropdownFrame = Instance.new("Frame")
-dropdownFrame.Size = UDim2.new(0.6, 0, 0, 0) -- تصغير الحجم
-dropdownFrame.Position = UDim2.new(0, 250, 0.2, 0) -- جعل القائمة تظهر بجانب الواجهة
-dropdownFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-dropdownFrame.Visible = false
-dropdownFrame.Parent = screenGui
-
-local layout = Instance.new("UIListLayout")
-layout.Parent = dropdownFrame
-
-local toggleButton = Instance.new("TextButton")
-toggleButton.Text = "OFF"
-toggleButton.Size = UDim2.new(0.8, 0, 0, 40)
-toggleButton.Position = UDim2.new(0.1, 0, 0.7, 0)
-toggleButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.Parent = frame
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Text = "Waiting to start..."
-statusLabel.Size = UDim2.new(1, 0, 0, 20)
-statusLabel.Position = UDim2.new(0, 0, 0.9, 0)
-statusLabel.BackgroundTransparency = 1
-statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-statusLabel.Parent = frame
-
--- متغيرات السكريبت
-local isRunning = false
-local selectedEnchant = availableEnchants[1] -- القيمة الافتراضية
-local args = {6, 1}
-
--- إنشاء خيارات القائمة المنسدلة
+-- إضافة الخيارات للقائمة المنسدلة
 for _, enchant in ipairs(availableEnchants) do
-    local option = Instance.new("TextButton")
-    option.Text = enchant
-    option.Size = UDim2.new(1, 0, 0, 30)
-    option.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    option.TextColor3 = Color3.fromRGB(255, 255, 255)
-    option.Parent = dropdownFrame
-    
-    option.MouseButton1Click:Connect(function()
-        selectedEnchant = enchant
-        dropdown.Text = enchant .. " ▼"
-        dropdownFrame.Visible = false
-    end)
+    library.UI:Create("TextButton", {
+        Parent = dropdownFrame,
+        Size = UDim2.new(1, 0, 0, 30),
+        Text = enchant,
+        BackgroundColor3 = Color3.fromRGB(70, 70, 70),
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        MouseButton1Click = function()
+            dropdown.Text = enchant .. " ▼"
+            dropdownFrame.Visible = false
+        end
+    })
 end
 
--- دالة لفتح/إغلاق القائمة المنسدلة
+-- فتح وإغلاق القائمة المنسدلة عند النقر على الزر
 dropdown.MouseButton1Click:Connect(function()
     dropdownFrame.Visible = not dropdownFrame.Visible
     if dropdownFrame.Visible then
-        dropdownFrame.Size = UDim2.new(0.6, 0, 0, #availableEnchants * 30) -- تصغير الحجم بناءً على العناصر
+        dropdownFrame.Size = UDim2.new(0.8, 0, 0, #availableEnchants * 30)
     else
-        dropdownFrame.Size = UDim2.new(0.6, 0, 0, 0)
+        dropdownFrame.Size = UDim2.new(0.8, 0, 0, 0)
     end
 end)
 
--- دالة للتحقق من السحر الحالي
-local function getCurrentEnchant()
-    local success, result = pcall(function()
-        return Player.PlayerGui.ScreenGui.Enchant.Content.Slots["1"].EnchantName.Text
-    end)
-    return success and result or ""
-end
+-- إعداد زر التشغيل والإيقاف
+local toggleButton = library.UI:Create("TextButton", {
+    Parent = frame,
+    Size = UDim2.new(0.8, 0, 0, 40),
+    Position = UDim2.new(0.1, 0, 0.7, 0),
+    Text = "OFF",
+    BackgroundColor3 = Color3.fromRGB(255, 60, 60),
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+})
 
--- دالة تنفيذ السحر
-local function performEnchant()
-    local success, errorMsg = pcall(function()
-        local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Enchant")
-        if remote then
-            remote:FireServer(unpack(args))
-            return true
-        end
-        return false
-    end)
-    
-    if not success then
-        statusLabel.Text = "Error: "..tostring(errorMsg)
-        return false
-    end
-    return true
-end
+-- إعداد حالة الزر والواجهة
+local statusLabel = library.UI:Create("TextLabel", {
+    Parent = frame,
+    Size = UDim2.new(1, 0, 0, 20),
+    Position = UDim2.new(0, 0, 0.9, 0),
+    BackgroundTransparency = 1,
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    Text = "Waiting to start...",
+})
 
--- الحلقة الرئيسية المعدلة
-local function enchantLoop()
-    while isRunning do
-        local currentEnchant = getCurrentEnchant()
-        
-        if currentEnchant == selectedEnchant then
-            statusLabel.Text = "Target reached: "..selectedEnchant
-            isRunning = false
-            toggleButton.Text = "OFF"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-            break
-        end
-        
-        statusLabel.Text = "Current: "..currentEnchant.." | Target: "..selectedEnchant
-        
-        if not performEnchant() then
-            isRunning = false
-            toggleButton.Text = "OFF"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-            break
-        end
-        
-        task.wait(0.5)
-    end
-end
+-- متغيرات التشغيل
+local isRunning = false
+local selectedEnchant = availableEnchants[1]
 
--- زر التشغيل/الإيقاف
+-- تنفيذ الفعل عند الضغط على الزر
 toggleButton.MouseButton1Click:Connect(function()
     isRunning = not isRunning
-    
     if isRunning then
         toggleButton.Text = "ON"
         toggleButton.BackgroundColor3 = Color3.fromRGB(60, 255, 60)
-        statusLabel.Text = "Running... Target: "..selectedEnchant
-        task.spawn(enchantLoop)
+        statusLabel.Text = "Running... Target: " .. selectedEnchant
     else
         toggleButton.Text = "OFF"
         toggleButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
         statusLabel.Text = "Stopped"
-    end
-end)
-
--- جعل الواجهة قابلة للسحب (نفس الكود السابق)
-local dragging, dragInput, dragStart, startPos
-
-local function update(input)
-    local delta = input.Position - dragStart
-    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-frame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
     end
 end)
